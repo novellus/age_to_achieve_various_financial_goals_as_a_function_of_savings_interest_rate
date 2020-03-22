@@ -132,7 +132,8 @@ if __name__ == '__main__':
     plt.xlim(initial_age, likely_death_age)
     plt.ylim(0, 100)
 
-    colors = ['red', 'green', 'blue', 'orange', 'yellow', 'black', 'brown', 'gray', 'cyan', 'magenta']
+    # colors = ['red', 'green', 'blue', 'orange', 'yellow', 'black', 'brown', 'gray', 'cyan', 'magenta']
+    colors = ['red', 'green', 'blue', 'orange', 'black', 'brown', 'gray', 'cyan', 'magenta']
 
     # plot line indicating will surive to likely_death_age
     # lambda x: -x + 120
