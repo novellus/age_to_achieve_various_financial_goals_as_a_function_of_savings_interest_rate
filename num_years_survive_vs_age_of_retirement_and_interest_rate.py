@@ -135,13 +135,29 @@ if __name__ == '__main__':
     # colors = ['red', 'green', 'blue', 'orange', 'yellow', 'black', 'brown', 'gray', 'cyan', 'magenta']
     colors = ['red', 'green', 'blue', 'orange', 'black', 'brown', 'gray', 'cyan', 'magenta']
 
-    # plot line indicating will surive to likely_death_age
-    plt.plot([initial_age, likely_death_age], [likely_death_age-initial_age, 0], c=colors[0], marker=None, linestyle='--', label=f'enough savings to survive until age {likely_death_age}')
+    # reference indicating enopugh capital accrued to surive to likely_death_age
+    region_patches = []
+    previous_y = None
+    for i_region, difference in enumerate(np.linspace(0, 80, 5)):
+        x, y = [initial_age, likely_death_age], [likely_death_age - initial_age - difference, 0 - difference]
+        
+        if previous_y is None:
+            upper_bound = 100
+        else:
+            upper_bound = previous_y
+        previous_y = y
+        
+        plt.fill_between(x, y, upper_bound, facecolor=colors[(i_region)%len(colors)], alpha=0.1)
+        region_patch = matplotlib.patches.Patch(color=colors[(i_region)%len(colors)], label=f'enough savings to survive until age {int(likely_death_age - difference)}')
+        region_patches.append(region_patch)
+
+    # reference slopes indicating ratio of years free to years working
     for i_plot, slope in enumerate([2/5.0, 1.0, 5/2.0, 5/1.0]):
         # slope is years free / years worked
-        plt.plot([initial_age, likely_death_age], [8, 8 + slope * (likely_death_age - initial_age)], c=colors[(i_plot+1)%len(colors)], marker=None, linestyle='--', label=f'slope {slope:.3}')
+        plt.plot([initial_age, likely_death_age], [8, 8 + slope * (likely_death_age - initial_age)], c=colors[(i_plot+1)%len(colors)], marker=None, linestyle='--', label=f'reference slope {slope:.3}')
 
     # siumulation setup
+    # interest_rates = np.linspace(1, 1.13, 14)
     interest_rates = np.geomspace(1, 1.13, 15)
     interest_rates = list(interest_rates) + [inflation_rate]
     interest_rates = reversed(sorted(interest_rates))
@@ -170,7 +186,8 @@ if __name__ == '__main__':
             data['retirement_age'].append(retirement_age)
             data['num_years_survived_after_retirement'].append(run_data['num_years_after_retirement'][-1])
 
-        plt.plot(data['retirement_age'], data['num_years_survived_after_retirement'], c=colors[i_plot%len(colors)], marker='x', markersize=2, label=f'interest_rate = {(interest_rate - 1.0) * 100 :.3}%')
+        plt.plot(data['retirement_age'], data['num_years_survived_after_retirement'], c=colors[i_plot%len(colors)], marker='x', markersize=2, label=f'years survival, at interest_rate = {(interest_rate - 1.0) * 100 :.3}%')
 
-plt.legend(loc=1)
-plt.show()
+    handles, labels = plt.gca().get_legend_handles_labels()
+    plt.legend(loc=1, handles = region_patches + handles)
+    plt.show()
