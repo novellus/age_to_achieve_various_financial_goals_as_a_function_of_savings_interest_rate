@@ -175,7 +175,7 @@ if __name__ == '__main__':
                                                                     interest_rate = interest_rate,
                                                                     inflation_rate = inflation_rate,
                                                                     retirement_age = retirement_age,
-                                                                    end_num_years_after_retirement = 100,
+                                                                    end_num_years_after_retirement = 120,
                                                                     end_after_num_years_sim_time = None, 
                                                                     end_if_out_of_money = True,
                                                                     end_if_breakeven_with_inflation = False,
