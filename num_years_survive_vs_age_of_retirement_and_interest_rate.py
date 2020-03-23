@@ -139,7 +139,7 @@ if __name__ == '__main__':
     plt.plot([initial_age, likely_death_age], [likely_death_age-initial_age, 0], c=colors[0], marker=None, linestyle='--', label=f'enough savings to survive until age {likely_death_age}')
     for i_plot, slope in enumerate([2/5.0, 1.0, 5/2.0, 5/1.0]):
         # slope is years free / years worked
-        plt.plot([initial_age, likely_death_age], [8, 8 + slope * likely_death_age], c=colors[(i_plot+1)%len(colors)], marker=None, linestyle='--', label=f'slope {slope:.3}')
+        plt.plot([initial_age, likely_death_age], [8, 8 + slope * (likely_death_age - initial_age)], c=colors[(i_plot+1)%len(colors)], marker=None, linestyle='--', label=f'slope {slope:.3}')
 
     # siumulation setup
     interest_rates = np.geomspace(1, 1.13, 15)
