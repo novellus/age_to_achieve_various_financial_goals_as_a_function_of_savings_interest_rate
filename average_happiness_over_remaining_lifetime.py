@@ -121,7 +121,7 @@ if __name__ == '__main__':
     # interest_rate = earned on savings
 
     # plot setup
-    descriptor = (f'Average happiness over lifetime as a function of age of retirement and annual interest rate. (evaluated at 1-year intervals)\n' + 
+    descriptor = (f'Average happiness over remaining lifetime as a function of age of retirement and annual interest rate. (evaluated at 1-year intervals)\n' + 
                   f'initial_age = {initial_age}, inflation_rate = {(inflation_rate-1)*100:.3}% (annual), initial_money = {initial_money}, annual_gross_earn_rate = {annual_gross_earn_rate}, annual_cost_of_living = {annual_cost_of_living}')
 
     plt.figure()
@@ -193,8 +193,8 @@ if __name__ == '__main__':
             data['retirement_age'].append(retirement_age)
             data['num_years_survived_after_retirement'].append(run_data['num_years_after_retirement'][-1])
             data['ratio_num_years_survived_after_retirement'].append(run_data['num_years_after_retirement'][-1]/float(retirement_age))
-            data['average_happiness'].append((float(retirement_age)*6.202806122 + run_data['num_years_after_retirement'][-1]*7.665391156)/(float(retirement_age) + run_data['num_years_after_retirement'][-1]))
-            # data['average_happiness'].append((float(retirement_age - initial_age)*6.202806122 + run_data['num_years_after_retirement'][-1]*7.665391156)/(float(retirement_age - initial_age) + run_data['num_years_after_retirement'][-1]))
+            # data['average_happiness'].append((float(retirement_age)*6.202806122 + run_data['num_years_after_retirement'][-1]*7.665391156)/(float(retirement_age) + run_data['num_years_after_retirement'][-1]))
+            data['average_happiness'].append((float(retirement_age - initial_age)*6.202806122 + run_data['num_years_after_retirement'][-1]*7.665391156)/(float(retirement_age - initial_age) + run_data['num_years_after_retirement'][-1]))
 
         plt.plot(data['retirement_age'], data['average_happiness'], c=colors[i_plot%len(colors)], marker='x', markersize=2, label=f'average happiness, at interest_rate = {(interest_rate - 1.0) * 100 :.3}%')
 

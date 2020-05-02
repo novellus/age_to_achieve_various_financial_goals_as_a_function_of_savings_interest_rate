@@ -63,8 +63,10 @@ def simulate_until_end_condition(initial_age, initial_money, annual_cost_of_livi
 
         if possible_to_breakeven_with_inflation:
             x_breakeven_with_inflation = calc_breakeven_with_inflation(n, interest_rate, inflation_rate, annual_cost_of_living)
+            broke_even_with_inflation = (x >= x_breakeven_with_inflation)
         else:
             x_breakeven_with_inflation = None
+            broke_even_with_inflation = False
 
         # log data
         data['x'].append(x)
@@ -72,25 +74,26 @@ def simulate_until_end_condition(initial_age, initial_money, annual_cost_of_livi
         data['retired'].append(retired)
         data['num_years_after_retirement'].append(num_years_after_retirement)
         data['x_breakeven_with_inflation'].append(x_breakeven_with_inflation)
+        data['broke_even_with_inflation'].append(broke_even_with_inflation)
 
         # end conditions
         if end_if_out_of_money and x <= 0:
             end_condition = 'out_of_money'
             break
 
-        if end_if_breakeven_with_inflation and possible_to_breakeven_with_inflation and x >= x_breakeven_with_inflation:
+        if end_if_breakeven_with_inflation and possible_to_breakeven_with_inflation and broke_even_with_inflation:
             end_condition = 'breakeven_with_inflation'
             break
 
-        if end_after_num_years_sim_time and n >= end_after_num_years_sim_time:
+        if end_after_num_years_sim_time is not None and n >= end_after_num_years_sim_time:
             end_condition = 'num_years_sim_time'
             break
 
-        if end_at_age and age >= end_at_age:
+        if end_at_age is not None and age >= end_at_age:
             end_condition = 'age'
             break
 
-        if end_num_years_after_retirement and num_years_after_retirement is not None and num_years_after_retirement >= end_num_years_after_retirement:
+        if end_num_years_after_retirement is not None and num_years_after_retirement is not None and num_years_after_retirement >= end_num_years_after_retirement:
             end_condition = 'num_years_after_retirement'
             break
 
@@ -110,40 +113,45 @@ def simulate_until_end_condition(initial_age, initial_money, annual_cost_of_livi
 if __name__ == '__main__':
     # params
     initial_age = 28
-    initial_money = 300000
+    initial_money = 375000
     annual_cost_of_living = 38000  # at time of initial design, and sustained *times inflation rates*
     annual_gross_earn_rate = 75000 # while working, and sustained *times inflation rates*
     # annual_gross_earn_rate = 38000 # while working, and sustained *times inflation rates*
     # annual_gross_earn_rate = 125000 # while working, and sustained *times inflation rates*
     inflation_rate = 1.0323
     # inflation_rate = 1.0
-    likely_death_age = 120
-    # interest_rate = earned on savings
+    maximum_death_age = 124
+    # interest_rate = 1.02  # earned on savings
+    working_happiness = 6.2  # out of 10, averaged over a year
+    # working_happiness = 5.4  # if work value goes down to 3.0
+    free_happiness = 7.7
 
     # plot setup
-    descriptor = (f'Average happiness over lifetime as a function of age of retirement and annual interest rate. (evaluated at 1-year intervals)\n' + 
-                  f'initial_age = {initial_age}, inflation_rate = {(inflation_rate-1)*100:.3}% (annual), initial_money = {initial_money}, annual_gross_earn_rate = {annual_gross_earn_rate}, annual_cost_of_living = {annual_cost_of_living}')
+    descriptor = (f'Maximim average happiness over remaining lifetime and optimal retirement age as a function of interest rate. (evaluated at discrete 1-year intervals)\n' +
+                  f'initial_age = {initial_age}, maximum_death_age = {maximum_death_age+1}, inflation_rate = {(inflation_rate-1)*100:.3}% (annual), initial_money = {initial_money}, annual_gross_earn_rate = {annual_gross_earn_rate}, annual_cost_of_living = {annual_cost_of_living}\n' +
+                  f'working_happiness = {working_happiness}, free_happiness = {free_happiness} (average value for one year, scale out of 10)')
 
     plt.figure()
     # plt.gca().xaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(xmax=1.0))
-    plt.xlabel('age of retirement')
-    plt.ylabel('average happiness (scale out of 10)')
+    # 'working_happiness (scale out of 10)'
+    plt.xlabel('interest rate (annual)')
+    plt.ylabel('optimal ages, which maximize average happiness over remaining lifetime')
     plt.title(descriptor)
     plt.minorticks_on()
     plt.grid(b=True, which='major', color='black', linestyle='-')
     plt.grid(b=True, which='minor', color='red', linestyle='--')
-    plt.xlim(initial_age, likely_death_age)
-    # plt.ylim(0, 100)
-    plt.ylim(6.202806122, 7.665391156)
+    plt.gca().xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda val, pos: f'{(val-1)*100:.3}%'))
+    plt.xlim(1.0, 1.1)
+    plt.ylim(initial_age, maximum_death_age + 4)
 
     # colors = ['red', 'green', 'blue', 'orange', 'yellow', 'black', 'brown', 'gray', 'cyan', 'magenta']
     colors = ['red', 'green', 'blue', 'orange', 'black', 'brown', 'gray', 'cyan', 'magenta']
 
-    # # reference indicating enopugh capital accrued to surive to likely_death_age
+    # # reference indicating enopugh capital accrued to surive to maximum_death_age
     # region_patches = []
     # previous_y = None
     # for i_region, difference in enumerate(np.linspace(0, 80, 5)):
-    #     x, y = [initial_age, likely_death_age], [likely_death_age - initial_age - difference, 0 - difference]
+    #     x, y = [initial_age, maximum_death_age], [maximum_death_age - initial_age - difference, 0 - difference]
         
     #     if previous_y is None:
     #         upper_bound = 100
@@ -152,28 +160,35 @@ if __name__ == '__main__':
     #     previous_y = y
         
     #     plt.fill_between(x, y, upper_bound, facecolor=colors[(i_region)%len(colors)], alpha=0.1)
-    #     region_patch = matplotlib.patches.Patch(color=colors[(i_region)%len(colors)], label=f'enough savings to survive until age {int(likely_death_age - difference)}')
+    #     region_patch = matplotlib.patches.Patch(color=colors[(i_region)%len(colors)], label=f'enough savings to survive until age {int(maximum_death_age - difference)}')
     #     region_patches.append(region_patch)
 
     # # reference slopes indicating ratio of years free to years working
     # for i_plot, slope in enumerate([2/5.0, 1.0, 1.2, 5/2.0]):
     #     # slope is years free / years worked
-    #     plt.plot([initial_age, likely_death_age], [8, 8 + slope * (likely_death_age - initial_age)], c=colors[(i_plot+1)%len(colors)], marker=None, linestyle='--', label=f'reference slope {slope:.3}')
+    #     plt.plot([initial_age, maximum_death_age], [8, 8 + slope * (maximum_death_age - initial_age)], c=colors[(i_plot+1)%len(colors)], marker=None, linestyle='--', label=f'reference slope {slope:.3}')
 
     # siumulation setup
-    # interest_rates = [1.0, 1.001, 1.002]
+    # interest_rates = [1.035]
     # interest_rates = np.linspace(1, 1.13, 14)
     # interest_rates = np.geomspace(1, 1.13, 15)
     # interest_rates = list(interest_rates) + [inflation_rate, 1.046]
-    interest_rates = list(np.geomspace(1, inflation_rate, 4, endpoint=False)) + list(np.geomspace(inflation_rate, 1.045, 6, endpoint=False)) + list(np.geomspace(1.045, 1.13, 4))
-    interest_rates = reversed(sorted(interest_rates))
+    # interest_rates = list(np.geomspace(1, inflation_rate, 4, endpoint=False)) + list(np.geomspace(inflation_rate, 1.045, 6, endpoint=False)) + list(np.geomspace(1.045, 1.13, 4))
+    # interest_rates = [1.04 - x for x in np.geomspace(1, 1.04, 11)]
+    # interest_rates = [1.04-(x-1)*10/9.0*0.004 for x in np.geomspace(1,10,20)]
+    # interest_rates = [1.023]
+    interest_rates = list(np.linspace(1, 1.10, 3000))
+    interest_rates = list(reversed(sorted(interest_rates)))
+
+    # working_happinesses = list(np.linspace(0.0, 10.0, 100))
+    # working_happinesses = list(reversed(sorted(working_happinesses)))
 
     # siumulation
-    for i_plot, interest_rate in enumerate(interest_rates):
-        data = defaultdict(list)
-        # print(f'processing {interest_rate}')
+    data_interest_rate_meta = defaultdict(list)
+    for interest_rate in interest_rates:
+        data_run_meta = defaultdict(list)
 
-        for retirement_age in range(initial_age, likely_death_age + 1):
+        for retirement_age in range(initial_age, maximum_death_age + 1):
             end_condition, run_data  = simulate_until_end_condition(initial_age = initial_age,
                                                                     initial_money = initial_money,
                                                                     annual_cost_of_living = annual_cost_of_living,
@@ -185,20 +200,59 @@ if __name__ == '__main__':
                                                                     end_after_num_years_sim_time = None, 
                                                                     end_if_out_of_money = True,
                                                                     end_if_breakeven_with_inflation = False,
-                                                                    # end_at_age = 121)
-                                                                    end_at_age = 10000)
+                                                                    end_at_age = maximum_death_age + 1)
+                                                                    # end_at_age = 10000)
 
             # log data
             # print(f'\tretirement_age {retirement_age} -> end_condition {end_condition}, {run_data["num_years_after_retirement"][-1]}')
-            data['retirement_age'].append(retirement_age)
-            data['num_years_survived_after_retirement'].append(run_data['num_years_after_retirement'][-1])
-            data['ratio_num_years_survived_after_retirement'].append(run_data['num_years_after_retirement'][-1]/float(retirement_age))
-            data['average_happiness'].append((float(retirement_age)*6.202806122 + run_data['num_years_after_retirement'][-1]*7.665391156)/(float(retirement_age) + run_data['num_years_after_retirement'][-1]))
-            # data['average_happiness'].append((float(retirement_age - initial_age)*6.202806122 + run_data['num_years_after_retirement'][-1]*7.665391156)/(float(retirement_age - initial_age) + run_data['num_years_after_retirement'][-1]))
+            data_run_meta['retirement_age'].append(retirement_age)
+            data_run_meta['broke_even_with_inflation'].append(run_data['broke_even_with_inflation'][-1])
+            data_run_meta['death_age'].append(run_data['age'][-1])
+            # data_run_meta['num_years_survived_after_retirement'].append(run_data['num_years_after_retirement'][-1])
+            # data_run_meta['ratio_num_years_survived_after_retirement'].append(run_data['num_years_after_retirement'][-1]/float(retirement_age))
 
-        plt.plot(data['retirement_age'], data['average_happiness'], c=colors[i_plot%len(colors)], marker='x', markersize=2, label=f'average happiness, at interest_rate = {(interest_rate - 1.0) * 100 :.3}%')
+            if working_happiness >= free_happiness:
+                data_run_meta['average_happiness'].append(working_happiness)
+            # elif run_data['broke_even_with_inflation'][-1]:
+            #     data_run_meta['average_happiness'].append(free_happiness)
+            else:
+                data_run_meta['average_happiness'].append((float(retirement_age - initial_age)*working_happiness + run_data['num_years_after_retirement'][-1]*free_happiness)/(float(retirement_age - initial_age) + run_data['num_years_after_retirement'][-1]))
 
-    handles, labels = plt.gca().get_legend_handles_labels()
-    # plt.legend(loc=1, handles = region_patches + handles)
+        # compute optimal retirement age
+        max_happiness, retirement_age_for_max_happiness = -float('inf'), None
+        death_age = None
+        for i_average_happiness, average_happiness in enumerate(data_run_meta['average_happiness']):
+            if average_happiness >= max_happiness or math.isclose(average_happiness, max_happiness):  # prefer latest retirement to maximize secondary oppurtunities
+                max_happiness = average_happiness
+                retirement_age_for_max_happiness = data_run_meta['retirement_age'][i_average_happiness]
+                death_age = data_run_meta['death_age'][i_average_happiness]
+
+        data_interest_rate_meta['interest_rate'].append(interest_rate)
+        data_interest_rate_meta['max_happiness'].append(max_happiness)
+        data_interest_rate_meta['retirement_age_for_max_happiness'].append(retirement_age_for_max_happiness)
+        data_interest_rate_meta['death_age'].append(death_age)
+
+    plt.plot(data_interest_rate_meta['interest_rate'], data_interest_rate_meta['retirement_age_for_max_happiness'], c='red', marker='x', markersize=2, label=f'optimal retirement age')
+    plt.plot(data_interest_rate_meta['interest_rate'], data_interest_rate_meta['death_age'], c='blue', marker='x', markersize=2, label=f'death age, given retirement age and corresponding savings')
+    plt.fill_between(data_interest_rate_meta['interest_rate'], data_interest_rate_meta['retirement_age_for_max_happiness'], data_interest_rate_meta['death_age'], facecolor='blue', alpha=0.1)
+    plt.plot([inflation_rate, inflation_rate], plt.gca().get_ybound(), c='magenta', linestyle='--', label=f'inflation_rate')
+
+    plt.gca().set_yticks(np.linspace(*plt.gca().get_ybound(), 11))
+    plt.legend(loc=2)
+
+    plt.twinx()
+    plt.ylabel('maximum happiness (scale out of 10)')
+    # plt.ylim(6.5, 7.5)
+
+    plt.plot(data_interest_rate_meta['interest_rate'], data_interest_rate_meta['max_happiness'], c='green', marker='x', markersize=2, label=f'average happiness over remaining lifetime')
+    plt.plot(plt.gca().get_xbound(), [7.0, 7.0], c='cyan', linestyle='--', label=f'minimum happiness to count as "worth it"')
+
+    plt.gca().set_yticks(np.linspace(*plt.gca().get_ybound(), 11))
     plt.legend(loc=1)
+
+    # ', at interest_rate = {(interest_rate-1)*100:.3}%'
+    # colors[i_plot%len(colors)]
+
+    # handles, labels = plt.gca().get_legend_handles_labels()
+    # plt.legend(loc=1, handles = region_patches + handles)
     plt.show()
