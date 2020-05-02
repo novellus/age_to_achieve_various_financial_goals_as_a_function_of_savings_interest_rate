@@ -120,7 +120,7 @@ if __name__ == '__main__':
     # annual_gross_earn_rate = 125000 # while working, and sustained *times inflation rates*
     inflation_rate = 1.0323
     # inflation_rate = 1.0
-    maximum_death_age = 120
+    maximum_death_age = 124
     # interest_rate = 1.02  # earned on savings
     working_happiness = 6.2  # out of 10, averaged over a year
     # working_happiness = 5.4  # if work value goes down to 3.0
@@ -128,7 +128,7 @@ if __name__ == '__main__':
 
     # plot setup
     descriptor = (f'Maximim average happiness over lifetime and optimal retirement age as a function of interest rate. (evaluated at discrete 1-year intervals)\n' +
-                  f'initial_age = {initial_age}, maximum_death_age = {maximum_death_age}, inflation_rate = {(inflation_rate-1)*100:.3}% (annual), initial_money = {initial_money}, annual_gross_earn_rate = {annual_gross_earn_rate}, annual_cost_of_living = {annual_cost_of_living}\n' +
+                  f'initial_age = {initial_age}, maximum_death_age = {maximum_death_age+1}, inflation_rate = {(inflation_rate-1)*100:.3}% (annual), initial_money = {initial_money}, annual_gross_earn_rate = {annual_gross_earn_rate}, annual_cost_of_living = {annual_cost_of_living}\n' +
                   f'working_happiness = {working_happiness}, free_happiness = {free_happiness} (average value for one year, scale out of 10)')
 
     plt.figure()
@@ -142,7 +142,7 @@ if __name__ == '__main__':
     plt.grid(b=True, which='minor', color='red', linestyle='--')
     plt.gca().xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda val, pos: f'{(val-1)*100:.3}%'))
     plt.xlim(1.0, 1.1)
-    plt.ylim(initial_age, maximum_death_age + 1)
+    plt.ylim(initial_age, maximum_death_age + 4)
 
     # colors = ['red', 'green', 'blue', 'orange', 'yellow', 'black', 'brown', 'gray', 'cyan', 'magenta']
     colors = ['red', 'green', 'blue', 'orange', 'black', 'brown', 'gray', 'cyan', 'magenta']
