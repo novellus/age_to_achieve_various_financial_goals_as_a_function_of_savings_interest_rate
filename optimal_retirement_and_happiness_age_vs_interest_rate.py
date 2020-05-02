@@ -140,6 +140,7 @@ if __name__ == '__main__':
     plt.minorticks_on()
     plt.grid(b=True, which='major', color='black', linestyle='-')
     plt.grid(b=True, which='minor', color='red', linestyle='--')
+    plt.gca().xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda val, pos: f'{(val-1)*100:.3}%'))
     plt.xlim(1.0, 1.1)
     plt.ylim(initial_age, maximum_death_age + 1)
 
