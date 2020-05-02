@@ -113,8 +113,10 @@ if __name__ == '__main__':
     initial_money = 300000
     annual_cost_of_living = 38000  # at time of initial design, and sustained *times inflation rates*
     annual_gross_earn_rate = 75000 # while working, and sustained *times inflation rates*
-    # annual_gross_earn_rate = 100000 # while working, and sustained *times inflation rates*
+    # annual_gross_earn_rate = 38000 # while working, and sustained *times inflation rates*
+    # annual_gross_earn_rate = 125000 # while working, and sustained *times inflation rates*
     inflation_rate = 1.0323
+    # inflation_rate = 1.0
     likely_death_age = 120
     # interest_rate = earned on savings
 
@@ -125,42 +127,45 @@ if __name__ == '__main__':
     plt.figure()
     # plt.gca().xaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(xmax=1.0))
     plt.xlabel('age of retirement')
-    plt.ylabel('Years of survival after retirement')
+    plt.ylabel('average happiness (scale out of 10)')
     plt.title(descriptor)
     plt.minorticks_on()
     plt.grid(b=True, which='major', color='black', linestyle='-')
     plt.grid(b=True, which='minor', color='red', linestyle='--')
     plt.xlim(initial_age, likely_death_age)
-    plt.ylim(0, 100)
+    # plt.ylim(0, 100)
+    plt.ylim(6.202806122, 7.665391156)
 
     # colors = ['red', 'green', 'blue', 'orange', 'yellow', 'black', 'brown', 'gray', 'cyan', 'magenta']
     colors = ['red', 'green', 'blue', 'orange', 'black', 'brown', 'gray', 'cyan', 'magenta']
 
-    # reference indicating enopugh capital accrued to surive to likely_death_age
-    region_patches = []
-    previous_y = None
-    for i_region, difference in enumerate(np.linspace(0, 80, 5)):
-        x, y = [initial_age, likely_death_age], [likely_death_age - initial_age - difference, 0 - difference]
+    # # reference indicating enopugh capital accrued to surive to likely_death_age
+    # region_patches = []
+    # previous_y = None
+    # for i_region, difference in enumerate(np.linspace(0, 80, 5)):
+    #     x, y = [initial_age, likely_death_age], [likely_death_age - initial_age - difference, 0 - difference]
         
-        if previous_y is None:
-            upper_bound = 100
-        else:
-            upper_bound = previous_y
-        previous_y = y
+    #     if previous_y is None:
+    #         upper_bound = 100
+    #     else:
+    #         upper_bound = previous_y
+    #     previous_y = y
         
-        plt.fill_between(x, y, upper_bound, facecolor=colors[(i_region)%len(colors)], alpha=0.1)
-        region_patch = matplotlib.patches.Patch(color=colors[(i_region)%len(colors)], label=f'enough savings to survive until age {int(likely_death_age - difference)}')
-        region_patches.append(region_patch)
+    #     plt.fill_between(x, y, upper_bound, facecolor=colors[(i_region)%len(colors)], alpha=0.1)
+    #     region_patch = matplotlib.patches.Patch(color=colors[(i_region)%len(colors)], label=f'enough savings to survive until age {int(likely_death_age - difference)}')
+    #     region_patches.append(region_patch)
 
-    # reference slopes indicating ratio of years free to years working
-    for i_plot, slope in enumerate([2/5.0, 1.0, 1.2, 5/2.0]):
-        # slope is years free / years worked
-        plt.plot([initial_age, likely_death_age], [8, 8 + slope * (likely_death_age - initial_age)], c=colors[(i_plot+1)%len(colors)], marker=None, linestyle='--', label=f'reference slope {slope:.3}')
+    # # reference slopes indicating ratio of years free to years working
+    # for i_plot, slope in enumerate([2/5.0, 1.0, 1.2, 5/2.0]):
+    #     # slope is years free / years worked
+    #     plt.plot([initial_age, likely_death_age], [8, 8 + slope * (likely_death_age - initial_age)], c=colors[(i_plot+1)%len(colors)], marker=None, linestyle='--', label=f'reference slope {slope:.3}')
 
     # siumulation setup
     # interest_rates = np.linspace(1, 1.13, 14)
-    interest_rates = np.geomspace(1, 1.13, 15)
-    interest_rates = list(interest_rates) + [inflation_rate]
+    # interest_rates = np.geomspace(1, 1.13, 15)
+    # interest_rates = list(interest_rates) + [inflation_rate, 1.046]
+    # interest_rates = list(np.geomspace(1, inflation_rate, 4, endpoint=False)) + list(np.geomspace(inflation_rate, 1.045, 6, endpoint=False)) + list(np.geomspace(1.045, 1.13, 4))
+    interest_rates = [1.0, 1.001, 1.002]
     interest_rates = reversed(sorted(interest_rates))
 
     # siumulation
@@ -176,19 +181,23 @@ if __name__ == '__main__':
                                                                     interest_rate = interest_rate,
                                                                     inflation_rate = inflation_rate,
                                                                     retirement_age = retirement_age,
-                                                                    end_num_years_after_retirement = 120,
+                                                                    end_num_years_after_retirement = None,
                                                                     end_after_num_years_sim_time = None, 
                                                                     end_if_out_of_money = True,
                                                                     end_if_breakeven_with_inflation = False,
-                                                                    end_at_age = False)
+                                                                    # end_at_age = 121)
+                                                                    end_at_age = 10000)
 
             # log data
             # print(f'\tretirement_age {retirement_age} -> end_condition {end_condition}, {run_data["num_years_after_retirement"][-1]}')
             data['retirement_age'].append(retirement_age)
             data['num_years_survived_after_retirement'].append(run_data['num_years_after_retirement'][-1])
+            data['ratio_num_years_survived_after_retirement'].append(run_data['num_years_after_retirement'][-1]/float(retirement_age))
+            data['average_happiness'].append((float(retirement_age)*6.202806122 + run_data['num_years_after_retirement'][-1]*7.665391156)/(float(retirement_age) + run_data['num_years_after_retirement'][-1]))
 
-        plt.plot(data['retirement_age'], data['num_years_survived_after_retirement'], c=colors[i_plot%len(colors)], marker='x', markersize=2, label=f'years survival, at interest_rate = {(interest_rate - 1.0) * 100 :.3}%')
+        plt.plot(data['retirement_age'], data['average_happiness'], c=colors[i_plot%len(colors)], marker='x', markersize=2, label=f'average happiness, at interest_rate = {(interest_rate - 1.0) * 100 :.3}%')
 
     handles, labels = plt.gca().get_legend_handles_labels()
-    plt.legend(loc=1, handles = region_patches + handles)
+    # plt.legend(loc=1, handles = region_patches + handles)
+    plt.legend(loc=1)
     plt.show()
