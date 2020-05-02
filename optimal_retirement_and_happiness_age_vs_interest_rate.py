@@ -129,7 +129,7 @@ if __name__ == '__main__':
     # plot setup
     descriptor = (f'Maximim average happiness over lifetime and optimal retirement age as a function of interest rate. (evaluated at discrete 1-year intervals)\n' +
                   f'initial_age = {initial_age}, maximum_death_age = {maximum_death_age}, inflation_rate = {(inflation_rate-1)*100:.3}% (annual), initial_money = {initial_money}, annual_gross_earn_rate = {annual_gross_earn_rate}, annual_cost_of_living = {annual_cost_of_living}\n' +
-                  f'working_happiness = {working_happiness}, free_happiness = {free_happiness} (scale out of 10)')
+                  f'working_happiness = {working_happiness}, free_happiness = {free_happiness} (average value for one year, scale out of 10)')
 
     plt.figure()
     # plt.gca().xaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(xmax=1.0))
