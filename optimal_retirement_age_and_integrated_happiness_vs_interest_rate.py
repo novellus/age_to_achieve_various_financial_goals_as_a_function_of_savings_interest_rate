@@ -117,7 +117,7 @@ if __name__ == '__main__':
     annual_cost_of_living = 38000  # at time of initial design, and sustained *times inflation rates*
     annual_gross_earn_rate = 75000 # while working, and sustained *times inflation rates*
     # annual_gross_earn_rate = 38000 # while working, and sustained *times inflation rates*
-    # annual_gross_earn_rate = 125000 # while working, and sustained *times inflation rates*
+    # annual_gross_earn_rate = 100000 # while working, and sustained *times inflation rates*
     inflation_rate = 1.0323
     # inflation_rate = 1.0
     maximum_death_age = 124
@@ -231,8 +231,8 @@ if __name__ == '__main__':
         data_interest_rate_meta['retirement_age_for_max_happiness'].append(retirement_age_for_max_happiness)
         data_interest_rate_meta['death_age'].append(death_age)
 
-    plt.plot(data_interest_rate_meta['interest_rate'], data_interest_rate_meta['retirement_age_for_max_happiness'], c='red', marker='x', markersize=2, label=f'optimal retirement age')
-    plt.plot(data_interest_rate_meta['interest_rate'], data_interest_rate_meta['death_age'], c='blue', marker='x', markersize=2, label=f'death age, given retirement age and corresponding savings')
+    plt.plot(data_interest_rate_meta['interest_rate'], data_interest_rate_meta['retirement_age_for_max_happiness'], c='red', marker=None, label=f'optimal retirement age')
+    plt.plot(data_interest_rate_meta['interest_rate'], data_interest_rate_meta['death_age'], c='blue', marker=None, label=f'death age, given retirement age and corresponding savings')
     plt.fill_between(data_interest_rate_meta['interest_rate'], data_interest_rate_meta['retirement_age_for_max_happiness'], data_interest_rate_meta['death_age'], facecolor='blue', alpha=0.1)
     plt.plot([inflation_rate, inflation_rate], plt.gca().get_ybound(), c='magenta', linestyle='--', label=f'inflation_rate')
 
@@ -243,7 +243,7 @@ if __name__ == '__main__':
     plt.ylabel('maximum integrated happiness (zero centered)')
     plt.ylim(-20, 50)
 
-    plt.plot(data_interest_rate_meta['interest_rate'], data_interest_rate_meta['max_happiness'], c='green', marker='x', markersize=2, label=f'average happiness over lifetime')
+    plt.plot(data_interest_rate_meta['interest_rate'], data_interest_rate_meta['max_happiness'], c='green', marker=None, label=f'average happiness over lifetime')
     plt.plot(plt.gca().get_xbound(), [0.0, 0.0], c='cyan', linestyle='--', label=f'minimum happiness to count as "worth it"')
 
     plt.gca().set_yticks(np.linspace(*plt.gca().get_ybound(), 11))

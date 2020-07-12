@@ -198,9 +198,9 @@ if __name__ == '__main__':
                                                                         end_num_years_after_retirement = None,
                                                                         end_after_num_years_sim_time = None, 
                                                                         end_if_out_of_money = True,
-                                                                        end_if_breakeven_with_inflation = True,
-                                                                        # end_at_age = likely_death_age + 1)
-                                                                        end_at_age = 10000)
+                                                                        end_if_breakeven_with_inflation = False,
+                                                                        end_at_age = likely_death_age + 1)
+                                                                        # end_at_age = 10000)
 
                 # log data
                 # print(f'\tretirement_age {retirement_age} -> end_condition {end_condition}, {run_data["num_years_after_retirement"][-1]}')
@@ -210,11 +210,11 @@ if __name__ == '__main__':
                 # data_run_meta['ratio_num_years_survived_after_retirement'].append(run_data['num_years_after_retirement'][-1]/float(retirement_age))
 
                 if working_happiness >= free_happiness:
-                    data_run_meta['average_happiness'].append(working_happiness)
-                elif run_data['broke_even_with_inflation'][-1]:
-                    data_run_meta['average_happiness'].append(free_happiness)
+                    data_run_meta['average_happiness'].append(working_happiness*run_data['age'][-1])
+                # elif run_data['broke_even_with_inflation'][-1]:
+                #     data_run_meta['average_happiness'].append(free_happiness)
                 else:
-                    data_run_meta['average_happiness'].append((float(retirement_age)*working_happiness + run_data['num_years_after_retirement'][-1]*free_happiness)/(float(retirement_age) + run_data['num_years_after_retirement'][-1]))
+                    data_run_meta['average_happiness'].append((float(retirement_age)*working_happiness + run_data['num_years_after_retirement'][-1]*free_happiness))
 
             # compute optimal retirement age
             max_happpiness, retirement_age_for_max_happiness = -float('inf'), None
