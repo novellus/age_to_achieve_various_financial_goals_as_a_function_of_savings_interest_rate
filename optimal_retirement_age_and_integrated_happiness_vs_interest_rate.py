@@ -113,9 +113,9 @@ def simulate_until_end_condition(initial_age, initial_money, annual_cost_of_livi
 if __name__ == '__main__':
     # params
     initial_age = 28
-    initial_money = 375000
+    initial_money = 435000
     annual_cost_of_living = 38000  # at time of initial design, and sustained *times inflation rates*
-    annual_gross_earn_rate = 75000 # while working, and sustained *times inflation rates*
+    annual_gross_earn_rate = 69000 # while working, and sustained *times inflation rates*
     # annual_gross_earn_rate = 38000 # while working, and sustained *times inflation rates*
     # annual_gross_earn_rate = 100000 # while working, and sustained *times inflation rates*
     inflation_rate = 1.0323
