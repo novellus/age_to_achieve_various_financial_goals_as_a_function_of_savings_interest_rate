@@ -61,6 +61,10 @@ def simulate_until_end_condition(initial_age, initial_money, annual_cost_of_livi
         # calcs
         age = n + initial_age
 
+        if age >= retirement_age:
+            retired = True
+            num_years_after_retirement = age - retirement_age
+
         if possible_to_breakeven_with_inflation:
             x_breakeven_with_inflation = calc_breakeven_with_inflation(n, interest_rate, inflation_rate, annual_cost_of_living)
             broke_even_with_inflation = (x >= x_breakeven_with_inflation)
@@ -101,19 +105,12 @@ def simulate_until_end_condition(initial_age, initial_money, annual_cost_of_livi
         x = calc_x_inflation(x, n, interest_rate, annual_gross_earn_rate, annual_cost_of_living, inflation_rate, earning = not retired)
         n += 1
 
-        if age == retirement_age:
-            retired = True
-            num_years_after_retirement = 0
-
-        if age > retirement_age:
-            num_years_after_retirement += 1
-
     return end_condition, data
 
 if __name__ == '__main__':
     # params
-    initial_age = 28
-    retirement_age = initial_age + 1
+    initial_age = 29
+    retirement_age = initial_age
     # initial_money = 435000
     initial_money = 300000
     annual_cost_of_living = 38000  # at time of initial design, and sustained *times inflation rates*
@@ -128,22 +125,26 @@ if __name__ == '__main__':
     free_happiness = 0.6653911565
 
     # plot setup
-    descriptor = (f'Integrated happiness over lifetime and death age as a function of savings value rate of change, assuming immediate retirement. (evaluated at discrete 1-year intervals)\n' +
-                  f'initial_age = {initial_age}, retirement_age = {retirement_age}, maximum_death_age = {maximum_death_age+1}, inflation_rate = {(inflation_rate-1)*100:.3}% (annual), initial_money = {initial_money}, annual_cost_of_living = {annual_cost_of_living}\n' +
+    descriptor = (f'Integrated happiness over lifetime and death age as a function of savings interest rate and retirement age. (evaluated at discrete 1-year intervals)\n' +
+                  f'Comparing immediate retirement vs optimal retirement age (maximizes integrated happiness). These regions are identical except for a small window near the middle.\n' +
+                  f'initial_age = {initial_age}, maximum_death_age = {maximum_death_age+1}, inflation_rate = {(inflation_rate-1)*100:.3}% (annual), initial_money = {initial_money}, annual_gross_earn_rate = {annual_gross_earn_rate}, annual_cost_of_living = {annual_cost_of_living}\n' +
                   f'working_happiness = {working_happiness}, free_happiness = {free_happiness} (integrated value for one year, zero centered)')
+
+    # assuming immediate retirement
+    # maximizing integrated happiness over lifetime
 
     plt.figure()
     # plt.gca().xaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(xmax=1.0))
     # 'working_happiness (scale out of 10)'
-    plt.xlabel('savings value rate of change (annual)')
-    plt.ylabel('optimal ages, which maximize average happiness over lifetime')
+    plt.xlabel('savings annual interest or depreciation')
+    plt.ylabel('age')
     plt.title(descriptor)
     plt.minorticks_on()
     plt.grid(b=True, which='major', color='black', linestyle='-')
     plt.grid(b=True, which='minor', color='red', linestyle='--')
     plt.gca().xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda val, pos: f'{(val-1)*100:.3}%'))
     plt.xlim(0.7, 1.3)
-    plt.ylim(initial_age, maximum_death_age + 4)
+    plt.ylim(initial_age - 1, maximum_death_age + 4)
 
     # colors = ['red', 'green', 'blue', 'orange', 'yellow', 'black', 'brown', 'gray', 'cyan', 'magenta']
     colors = ['red', 'green', 'blue', 'orange', 'black', 'brown', 'gray', 'cyan', 'magenta']
@@ -184,8 +185,8 @@ if __name__ == '__main__':
     # working_happinesses = list(np.linspace(0.0, 10.0, 100))
     # working_happinesses = list(reversed(sorted(working_happinesses)))
 
-    # siumulation
-    data_interest_rate_meta = defaultdict(list)
+    # simulation 1 - immediate retirement
+    data_immediate_retirement_interest_rate_meta = defaultdict(list)
     for interest_rate in interest_rates:
         end_condition, run_data  = simulate_until_end_condition(initial_age = initial_age,
                                                                 initial_money = initial_money,
@@ -203,36 +204,100 @@ if __name__ == '__main__':
 
         # log data
         # print(f'\tinterest_rate {interest_rate} -> end_condition {end_condition}, {run_data["num_years_after_retirement"][-1]}')
-        data_interest_rate_meta['interest_rate'].append(interest_rate)
-        data_interest_rate_meta['retirement_age'].append(retirement_age)
-        data_interest_rate_meta['broke_even_with_inflation'].append(run_data['broke_even_with_inflation'][-1])
-        data_interest_rate_meta['death_age'].append(run_data['age'][-1])
-        # data_interest_rate_meta['num_years_survived_after_retirement'].append(run_data['num_years_after_retirement'][-1])
-        # data_interest_rate_meta['ratio_num_years_survived_after_retirement'].append(run_data['num_years_after_retirement'][-1]/float(retirement_age))
+        data_immediate_retirement_interest_rate_meta['interest_rate'].append(interest_rate)
+        data_immediate_retirement_interest_rate_meta['retirement_age'].append(retirement_age)
+        data_immediate_retirement_interest_rate_meta['broke_even_with_inflation'].append(run_data['broke_even_with_inflation'][-1])
+        data_immediate_retirement_interest_rate_meta['death_age'].append(run_data['age'][-1])
 
         if working_happiness >= free_happiness:
-            data_interest_rate_meta['integrated_happiness'].append(working_happiness*run_data['age'][-1])
+            data_immediate_retirement_interest_rate_meta['integrated_happiness'].append(working_happiness*run_data['age'][-1])
         # elif run_data['broke_even_with_inflation'][-1]:
-        #     data_interest_rate_meta['integrated_happiness'].append(free_happiness)
+        #     data_immediate_retirement_interest_rate_meta['integrated_happiness'].append(free_happiness)
         else:
-            data_interest_rate_meta['integrated_happiness'].append(float(retirement_age)*working_happiness + run_data['num_years_after_retirement'][-1]*free_happiness)
+            data_immediate_retirement_interest_rate_meta['integrated_happiness'].append(float(retirement_age)*working_happiness + run_data['num_years_after_retirement'][-1]*free_happiness)
 
+    # simulation 2 - compute optimal retirement age, maximizing integrated happiness
+    data_optimal_retirement_interest_rate_meta = defaultdict(list)
+    for interest_rate in interest_rates:
+        data_run_meta = defaultdict(list)
 
-    plt.plot(data_interest_rate_meta['interest_rate'], data_interest_rate_meta['retirement_age'], c='red', marker=None, label=f'retirement age')
-    plt.plot(data_interest_rate_meta['interest_rate'], data_interest_rate_meta['death_age'], c='blue', marker=None, label=f'death age, given retirement age and corresponding savings')
-    plt.fill_between(data_interest_rate_meta['interest_rate'], data_interest_rate_meta['retirement_age'], data_interest_rate_meta['death_age'], facecolor='blue', alpha=0.1)
+        for retirement_age in range(initial_age, maximum_death_age + 1):
+            end_condition, run_data  = simulate_until_end_condition(initial_age = initial_age,
+                                                                    initial_money = initial_money,
+                                                                    annual_cost_of_living = annual_cost_of_living,
+                                                                    annual_gross_earn_rate = annual_gross_earn_rate,
+                                                                    interest_rate = interest_rate,
+                                                                    inflation_rate = inflation_rate,
+                                                                    retirement_age = retirement_age,
+                                                                    end_num_years_after_retirement = None,
+                                                                    end_after_num_years_sim_time = None, 
+                                                                    end_if_out_of_money = True,
+                                                                    end_if_breakeven_with_inflation = False,
+                                                                    end_at_age = maximum_death_age + 1)
+                                                                    # end_at_age = 10000)
+
+            # log data
+            data_run_meta['retirement_age'].append(retirement_age)
+            data_run_meta['broke_even_with_inflation'].append(run_data['broke_even_with_inflation'][-1])
+            data_run_meta['death_age'].append(run_data['age'][-1])
+
+            if working_happiness >= free_happiness:
+                data_run_meta['integrated_happiness'].append(working_happiness*run_data['age'][-1])
+            # elif run_data['broke_even_with_inflation'][-1]:
+            #     data_run_meta['integrated_happiness'].append(free_happiness)
+            else:
+                data_run_meta['integrated_happiness'].append(float(retirement_age)*working_happiness + run_data['num_years_after_retirement'][-1]*free_happiness)
+
+        # compute optimal retirement age
+        max_happiness, retirement_age_for_max_happiness = -float('inf'), None
+        broke_even_with_inflation = None
+        death_age = None
+        for i_integrated_happiness, integrated_happiness in enumerate(data_run_meta['integrated_happiness']):
+            if integrated_happiness >= max_happiness or math.isclose(integrated_happiness, max_happiness):  # prefer latest retirement to maximize secondary oppurtunities
+                max_happiness = integrated_happiness
+                retirement_age_for_max_happiness = data_run_meta['retirement_age'][i_integrated_happiness]
+                broke_even_with_inflation = data_run_meta['broke_even_with_inflation'][i_integrated_happiness]
+                death_age = data_run_meta['death_age'][i_integrated_happiness]
+
+        data_optimal_retirement_interest_rate_meta['interest_rate'].append(interest_rate)
+        data_optimal_retirement_interest_rate_meta['max_happiness'].append(max_happiness)
+        data_optimal_retirement_interest_rate_meta['retirement_age_for_max_happiness'].append(retirement_age_for_max_happiness)
+        data_optimal_retirement_interest_rate_meta['broke_even_with_inflation'].append(broke_even_with_inflation)
+        data_optimal_retirement_interest_rate_meta['death_age'].append(death_age)
+
+    # plot data
     plt.plot([inflation_rate, inflation_rate], plt.gca().get_ybound(), c='magenta', linestyle='--', linewidth=3, label=f'inflation_rate')
     plt.plot([1.2232, 1.2232], plt.gca().get_ybound(), c='black', linestyle='--', linewidth=3, label=f'SpaceX stock value rate of change, 4-pt fit 3/2018 to 7/2020')
     plt.plot([1.2888, 1.2888], plt.gca().get_ybound(), c='grey', linestyle='--', linewidth=3, label=f'SpaceX stock value rate of change, 17-pt fit 6/2014 to 7/2020')
 
-    plt.fill_between(data_interest_rate_meta['interest_rate'],
-                     data_interest_rate_meta['death_age'],
-                     (plt.ylim()[1],) * len(data_interest_rate_meta['interest_rate']),
-                     where=data_interest_rate_meta['broke_even_with_inflation'],
-                     facecolor='blue', hatch='xxx', edgecolor='#0000A0', alpha=0.1)
-    region_patch = matplotlib.patches.Patch(facecolor='blue', alpha=0.3, label=f'free life')
+    # plt.plot(data_immediate_retirement_interest_rate_meta['interest_rate'], data_immediate_retirement_interest_rate_meta['retirement_age'], c='red', marker=None, label=f'retirement age')
+    # plt.plot(data_immediate_retirement_interest_rate_meta['interest_rate'], data_immediate_retirement_interest_rate_meta['death_age'], c='blue', marker=None, label=f'death age, given retirement age and corresponding savings')
+    
+    plt.fill_between(data_immediate_retirement_interest_rate_meta['interest_rate'], data_immediate_retirement_interest_rate_meta['retirement_age'], data_immediate_retirement_interest_rate_meta['death_age'], facecolor='blue', alpha=0.1)
+    region_patch = matplotlib.patches.Patch(facecolor='blue', alpha=0.3, label=f'free life (retirement to death), with immediate retirement')
     region_patches.append(region_patch)
+
+    plt.fill_between(data_immediate_retirement_interest_rate_meta['interest_rate'],
+                     data_immediate_retirement_interest_rate_meta['death_age'],
+                     (plt.ylim()[1],) * len(data_immediate_retirement_interest_rate_meta['interest_rate']),
+                     where=data_immediate_retirement_interest_rate_meta['broke_even_with_inflation'],
+                     facecolor='blue', hatch='xxx', edgecolor='#0000A0', alpha=0.1)
     region_patch = matplotlib.patches.Patch(facecolor='blue', alpha=0.3, hatch='xxx', edgecolor='#0000A0', label=f'savings break even with inflation, will not drive death date')
+    region_patches.append(region_patch)
+    
+    # plt.plot(data_optimal_retirement_interest_rate_meta['interest_rate'], data_optimal_retirement_interest_rate_meta['retirement_age_for_max_happiness'], c='red', marker=None, label=f'optimal retirement age')
+    # plt.plot(data_optimal_retirement_interest_rate_meta['interest_rate'], data_optimal_retirement_interest_rate_meta['death_age'], c='blue', marker=None, label=f'death age, given retirement age and corresponding savings')
+    
+    plt.fill_between(data_optimal_retirement_interest_rate_meta['interest_rate'], data_optimal_retirement_interest_rate_meta['retirement_age_for_max_happiness'], data_optimal_retirement_interest_rate_meta['death_age'], facecolor='red', alpha=0.1)
+    region_patch = matplotlib.patches.Patch(facecolor='red', alpha=0.3, label=f'free life (retirement to death), with optimal retirement age (maximizes integrated happiness)')
+    region_patches.append(region_patch)
+
+    plt.fill_between(data_optimal_retirement_interest_rate_meta['interest_rate'],
+                     data_optimal_retirement_interest_rate_meta['death_age'],
+                     (plt.ylim()[1],) * len(data_optimal_retirement_interest_rate_meta['interest_rate']),
+                     where=data_optimal_retirement_interest_rate_meta['broke_even_with_inflation'],
+                     facecolor='red', hatch='xxx', edgecolor='#0000A0', alpha=0.1)
+    region_patch = matplotlib.patches.Patch(facecolor='red', alpha=0.3, hatch='xxx', edgecolor='#0000A0', label=f'savings break even with inflation, will not drive death date')
     region_patches.append(region_patch)
 
     plt.gca().set_yticks(np.linspace(*plt.gca().get_ybound(), 11))
@@ -241,11 +306,11 @@ if __name__ == '__main__':
     # plt.legend(loc=2)
 
     plt.twinx()
-    plt.ylabel('maximum integrated happiness (zero centered)')
-    # plt.ylim(-32, 48)
+    plt.ylabel('integrated happiness (zero centered)')
     plt.ylim(-40, 60)
 
-    plt.plot(data_interest_rate_meta['interest_rate'], data_interest_rate_meta['integrated_happiness'], c='green', marker=None, label=f'integrated happiness over lifetime')
+    plt.plot(data_immediate_retirement_interest_rate_meta['interest_rate'], data_immediate_retirement_interest_rate_meta['integrated_happiness'], c='blue', marker=None, label=f'integrated happiness over lifetime, immediate retirement')
+    plt.plot(data_optimal_retirement_interest_rate_meta['interest_rate'], data_optimal_retirement_interest_rate_meta['max_happiness'], c='red', marker=None, label=f'integrated happiness over lifetime, optimal retirement')
     plt.plot(plt.gca().get_xbound(), [0.0, 0.0], c='cyan', linestyle='--', linewidth=3, label=f'minimum happiness to count as "worth it"')
 
     plt.gca().set_yticks(np.linspace(*plt.gca().get_ybound(), 11))
