@@ -126,7 +126,7 @@ if __name__ == '__main__':
     free_happiness = 0.6653911565
 
     # plot setup
-    descriptor = (f'Maximim average happiness over lifetime and optimal retirement age as a function of interest rate. (evaluated at discrete 1-year intervals)\n' +
+    descriptor = (f'Maximim integrated happiness over lifetime and optimal retirement age as a function of interest rate. (evaluated at discrete 1-year intervals)\n' +
                   f'initial_age = {initial_age}, maximum_death_age = {maximum_death_age+1}, inflation_rate = {(inflation_rate-1)*100:.3}% (annual), initial_money = {initial_money}, annual_gross_earn_rate = {annual_gross_earn_rate}, annual_cost_of_living = {annual_cost_of_living}\n' +
                   f'working_happiness = {working_happiness}, free_happiness = {free_happiness} (integrated value for one year, zero centered)')
 
@@ -134,7 +134,7 @@ if __name__ == '__main__':
     # plt.gca().xaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(xmax=1.0))
     # 'working_happiness (scale out of 10)'
     plt.xlabel('interest rate (annual)')
-    plt.ylabel('optimal ages, which maximize average happiness over lifetime')
+    plt.ylabel('optimal ages, which maximize integrated happiness over lifetime')
     plt.title(descriptor)
     plt.minorticks_on()
     plt.grid(b=True, which='major', color='black', linestyle='-')
@@ -243,7 +243,7 @@ if __name__ == '__main__':
     plt.ylabel('maximum integrated happiness (zero centered)')
     plt.ylim(-20, 50)
 
-    plt.plot(data_interest_rate_meta['interest_rate'], data_interest_rate_meta['max_happiness'], c='green', marker=None, label=f'average happiness over lifetime')
+    plt.plot(data_interest_rate_meta['interest_rate'], data_interest_rate_meta['max_happiness'], c='green', marker=None, label=f'integrated happiness over lifetime')
     plt.plot(plt.gca().get_xbound(), [0.0, 0.0], c='cyan', linestyle='--', label=f'minimum happiness to count as "worth it"')
 
     plt.gca().set_yticks(np.linspace(*plt.gca().get_ybound(), 11))

@@ -196,7 +196,7 @@ if __name__ == '__main__':
             # data['average_happiness'].append((float(retirement_age)*-0.7971938776 + run_data['num_years_after_retirement'][-1]*0.6653911565))
             data['average_happiness'].append((float(retirement_age - initial_age)*-0.7971938776 + run_data['num_years_after_retirement'][-1]*0.6653911565))
 
-        plt.plot(data['retirement_age'], data['average_happiness'], c=colors[i_plot%len(colors)], marker='x', markersize=2, label=f'average happiness, at interest_rate = {(interest_rate - 1.0) * 100 :.3}%')
+        plt.plot(data['retirement_age'], data['average_happiness'], c=colors[i_plot%len(colors)], marker='x', markersize=2, label=f'integrated happiness, at interest_rate = {(interest_rate - 1.0) * 100 :.3}%')
 
     handles, labels = plt.gca().get_legend_handles_labels()
     # plt.legend(loc=1, handles = region_patches + handles)

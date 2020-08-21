@@ -136,7 +136,7 @@ if __name__ == '__main__':
     # plt.gca().xaxis.set_major_formatter(matplotlib.ticker.PercentFormatter(xmax=1.0))
     # 'working_happiness (scale out of 10)'
     plt.xlabel('savings value rate of change (annual)')
-    plt.ylabel('optimal ages, which maximize average happiness over lifetime')
+    plt.ylabel('age')
     plt.title(descriptor)
     plt.minorticks_on()
     plt.grid(b=True, which='major', color='black', linestyle='-')
